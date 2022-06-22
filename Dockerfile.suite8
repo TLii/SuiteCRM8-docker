@@ -1,0 +1,63 @@
+FROM debian:buster-slim as build
+RUN set -eux;\
+
+    apt -y update; \
+    apt -y upgrade; \
+    apt install -y curl gnupg; \
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list; \
+    apt update; \
+    apt install -y php-cli composer wget curl php-zip php-xml php-curl php-intl php-json yarn; \
+    apt install -y nodejs npm; \
+    npm install -g angular/cli; \
+    mkdir /build;
+
+WORKDIR /build
+
+RUN set -eux; \
+    git clone https://github.com/salesagility/SuiteCRM-Core.git .
+
+RUN set -eux; \
+    composer install; \
+    yarn install; \
+    ./vendor/bin/pscss -s compressed ./public/legacy/themes/suite8/css/Dawn/style.scss > ./public/legacy/themes/suite8/css/Dawn/style.css;
+
+FROM php:fpm as serve
+
+RUN apt update; \
+    apt upgrade -y; \
+    apt install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        curl \
+        gnupg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install \
+        curl \
+        common \
+        intl \
+        json \
+        gd \
+        mbstring \
+        mysqli \
+        pdo_mysql \
+        openssl \
+        soap \
+        xml \
+        zip \
+        imap \
+        ldap 
+
+RUN mkdir /suitecrm
+
+VOLUME /suitecrm
+
+COPY --from=build --chown=www-data:www-data /build /usr/src/suitecrm/
+
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+
+CMD [ "php-fpm" ]
