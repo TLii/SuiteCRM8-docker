@@ -1,9 +1,0 @@
-version: "3.9"
-services: 
-  suite8:
-    build:
-      dockerfile: Dockerfile.suite8
-      ports: 
-        - "80:80"
-  db:
-    image: mariadb:latest
