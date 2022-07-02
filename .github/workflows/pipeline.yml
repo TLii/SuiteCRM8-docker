@@ -29,7 +29,7 @@ jobs:
               
     - name: Set build version
       run: |
-        echo "BUILD_VERSION=$branch-$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        echo "BUILD_VERSION=$BRANCH-$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       
     - name: Docker Build & Push Action
       # You may pin to the exact commit or the version.
@@ -39,7 +39,7 @@ jobs:
         # Name of the Docker image
         image: suitecrm8/core
         # Tags override for Docker image
-        tags: latest, ${{ env.BRANCH }}, ${{ env.BUILD_VERSION }}, ${{ env.GITHUB_RUN_NUMBER }} # optional
+        tags: latest, ${{ env.BRANCH }}, ${{ env.BUILD_VERSION }} # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
