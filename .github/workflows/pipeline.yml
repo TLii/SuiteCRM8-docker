@@ -16,6 +16,10 @@ jobs:
     steps:
     - name: Check out CODE
       uses: actions/checkout@v2
+    
+    - name: Get current commit ID in short
+      run: |
+        GITHUB_HASH=$(git rev-parse --short "$GITHUB_SHA")
       
     - name: Set branch after repo dispatch
       if: github.event_name == 'repository_dispatch'
@@ -39,7 +43,7 @@ jobs:
         # Name of the Docker image
         image: suitecrm8/core
         # Tags override for Docker image
-        tags: latest, ${{ env.BRANCH }}, ${{ env.BUILD_VERSION }} # optional
+        tags: fpm-latest, fpm-${{ env.BRANCH }}-latest, fpm-${{ env.BRANCH }}, fpm-${{ env.BUILD_VERSION }}, {{ env.GITHUB_SHA }}, {{ env.GITHUB_HASH }}  # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
@@ -56,7 +60,7 @@ jobs:
         password: ${{ secrets.REGISTRY_PASSWORD }} # optional
         # Adds latest tag to auto-generated GitOps tag
         addLatest: true # optional, default is false
-    
+
     - name: Checkout Chart
       uses: actions/checkout@v3.0.0
       with: 
