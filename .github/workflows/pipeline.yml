@@ -37,9 +37,9 @@ jobs:
       uses: mr-smithers-excellent/docker-build-push@v5.6
       with:
         # Name of the Docker image
-        image: suitecrm8/${{ env.BRANCH }}
+        image: suitecrm8/core
         # Tags override for Docker image
-        tags: latest, ${{ env.BRANCH }}, ${{ env.BUILD_VERSION }} # optional
+        tags: latest, ${{ env.BRANCH }}, ${{ env.BUILD_VERSION }}, ${{ env.GITHUB_RUN_NUMBER }} # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
