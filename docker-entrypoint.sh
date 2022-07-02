@@ -15,138 +15,132 @@
 
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-	
 
-# Partially based on Docker Hub's official images; for those:
+
+# Partially derived from Docker Hub's official images; 
 # Copyright 2014 Docker, Inc.
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-# 	http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 set -Eeuo pipefail
 
-cd suitecrm
+[[ -d /suitecrm ]] && cd /suitecrm || (echo "WARN: SuiteCRM installation directory is missing. It should have been pre-made." && mkdir /suitecrm)
 
-if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
-	uid="$(id -u)"
-	gid="$(id -g)"
-	if [ "$uid" = '0' ]; then
-		case "$1" in
-			apache2*)
-				user="${APACHE_RUN_USER:-www-data}"
-				group="${APACHE_RUN_GROUP:-www-data}"
+user=www-data
+group=www-data
 
-				# strip off any '#' symbol ('#1000' is valid syntax for Apache)
-				pound='#'
-				user="${user#$pound}"
-				group="${group#$pound}"
-				;;
-			*) # php-fpm
-				user='www-data'
-				group='www-data'
-				;;
-		esac
-	else
-		user="$uid"
-		group="$gid"
+# Test for necessary environment variables and exit if missing crucial ones.
+	[[ -z $DATABASE_NAME ]] && (echo "ERROR: you need to set DATABASE_NAME to continue"; exit 5)
+	[[ -z $DATABASE_USER ]] && (echo "ERROR: you need to set DATABASE_USER to continue"; exit 5)
+	[[ -z $DATABASE_PASSWORD ]] && (echo "ERROR: you need to set DATABASE_PASSWORD to continue"; exit 5)
+	[[ -z $DATABASE_SERVER ]] && (echo "ERROR: you need to set DATABASE_SERVER to continue"; exit 5)
+	[[ -z $SUITECRM_SITEURL ]] && (echo "ERROR: you need to set SUITECRM_SITEURL to continue"; exit 5)
+
+# Setup correct user; (c) Docker, Inc
+	if [[ "$1" == apache2* ]] || [ "$1" = 'php-fpm' ]; then
+		uid="$(id -u)"
+		gid="$(id -g)"
+		if [ "$uid" = '0' ]; then
+			case "$1" in
+				apache2*)
+					user="${APACHE_RUN_USER:-www-data}"
+					group="${APACHE_RUN_GROUP:-www-data}"
+
+					# strip off any '#' symbol ('#1000' is valid syntax for Apache)
+					pound='#'
+					user="${user#$pound}"
+					group="${group#$pound}"
+					;;
+				*) # php-fpm
+					user='www-data'
+					group='www-data'
+					;;
+			esac
+		else
+			user="$uid"
+			group="$gid"
+		fi
 	fi
 
-	if [ ! -e public/index.php ] && [ ! -e wp-includes/version.php ]; then
-		# if the directory exists and WordPress doesn't appear to be installed AND the permissions of it are root:root, let's chown it (likely a Docker-created directory)
-		if [ "$uid" = '0' ] && [ "$(stat -c '%u:%g' .)" = '0:0' ]; then
-			chown "$user:$group" .
-		fi
-
-		echo >&2 "WordPress not found in $PWD - copying now..."
-		if [ -n "$(find -mindepth 1 -maxdepth 1 -not -name wp-content)" ]; then
-			echo >&2 "WARNING: $PWD is not empty! (copying anyhow)"
-		fi
-		sourceTarArgs=(
-			--create
-			--file -
-			--directory /usr/src/wordpress
-			--owner "$user" --group "$group"
-		)
-		targetTarArgs=(
-			--extract
-			--file -
-		)
-		if [ "$uid" != '0' ]; then
-			# avoid "tar: .: Cannot utime: Operation not permitted" and "tar: .: Cannot change mode to rwxr-xr-x: Operation not permitted"
-			targetTarArgs+=( --no-overwrite-dir )
-		fi
-		# loop over "pluggable" content in the source, and if it already exists in the destination, skip it
-		# https://github.com/docker-library/wordpress/issues/506 ("wp-content" persisted, "akismet" updated, WordPress container restarted/recreated, "akismet" downgraded)
-		for contentPath in \
-			/usr/src/wordpress/.htaccess \
-			/usr/src/wordpress/wp-content/*/*/ \
-		; do
-			contentPath="${contentPath%/}"
-			[ -e "$contentPath" ] || continue
-			contentPath="${contentPath#/usr/src/wordpress/}" # "wp-content/plugins/akismet", etc.
-			if [ -e "$PWD/$contentPath" ]; then
-				echo >&2 "WARNING: '$PWD/$contentPath' exists! (not copying the WordPress version)"
-				sourceTarArgs+=( --exclude "./$contentPath" )
-			fi
-		done
-		tar "${sourceTarArgs[@]}" . | tar "${targetTarArgs[@]}"
-		echo >&2 "Complete! WordPress has been successfully copied to $PWD"
+# Test for existing installation and install as necessary; original code by Docker, Inc, edited by TLii
+if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
+	
+	# Correct permissions if necessary
+	if [ "$uid" = '0' ] && [ "$(stat -c '%u:%g' .)" = '0:0' ]; then
+		chown "$user:$group" .
 	fi
 
-	wpEnvs=( "${!WORDPRESS_@}" )
-	if [ ! -s wp-config.php ] && [ "${#wpEnvs[@]}" -gt 0 ]; then
-		for wpConfigDocker in \
-			wp-config-docker.php \
-			/usr/src/wordpress/wp-config-docker.php \
-		; do
-			if [ -s "$wpConfigDocker" ]; then
-				echo >&2 "No 'wp-config.php' found in $PWD, but 'WORDPRESS_...' variables supplied; copying '$wpConfigDocker' (${wpEnvs[*]})"
-				# using "awk" to replace all instances of "put your unique phrase here" with a properly unique string (for AUTH_KEY and friends to have safe defaults if they aren't specified with environment variables)
-				awk '
-					/put your unique phrase here/ {
-						cmd = "head -c1m /dev/urandom | sha1sum | cut -d\\  -f1"
-						cmd | getline str
-						close(cmd)
-						gsub("put your unique phrase here", str)
-					}
-					{ print }
-				' "$wpConfigDocker" > wp-config.php
-				if [ "$uid" = '0' ]; then
-					# attempt to ensure that wp-config.php is owned by the run user
-					# could be on a filesystem that doesn't allow chown (like some NFS setups)
-					chown "$user:$group" wp-config.php || true
-				fi
-				break
-			fi
-		done
+	echo >&2 "SuiteCRM not found in $PWD - copying now..."
+	if [ -n "$(find -mindepth 1 -maxdepth 1 -not -name wp-content)" ]; then
+		echo >&2 "WARNING: $PWD is not empty! (copying anyhow)"
 	fi
+
+	sourceTarArgs=(
+		--create
+		--file -
+		--directory /usr/src/suitecrm
+		--owner "$user" --group "$group"
+	)
+	targetTarArgs=(
+		--extract
+		--file -
+	)
+	if [ "$uid" != '0' ]; then
+		# avoid "tar: .: Cannot utime: Operation not permitted" and "tar: .: Cannot change mode to rwxr-xr-x: Operation not permitted"
+		targetTarArgs+=( --no-overwrite-dir )
+	fi
+	# loop over "pluggable" content in the source, and if it already exists in the destination, skip it
+	for contentPath in \
+		/usr/src/suitecrm/core/modules \
+		/usr/src/suitecrm/extensions \
+		/usr/src/suitecrm/public/legacy/modules \
+		/usr/src/suitecrm/public/legacy/custom/*/* \
+	; do
+		contentPath="${contentPath%/}"
+		[ -e "$contentPath" ] || continue
+		contentPath="${contentPath#/usr/src/wordpress/}"
+		if [ -e "$PWD/$contentPath" ]; then
+			echo >&2 "WARNING: '$PWD/$contentPath' exists. Not overwriting with container version." #TODO: Make this check if update is in fact newer and patch if possible.
+			sourceTarArgs+=( --exclude "./$contentPath" )
+		fi
+	done
+	tar "${sourceTarArgs[@]}" . | tar "${targetTarArgs[@]}"
+	echo >&2 "Complete! SuiteCRM has been successfully copied to $PWD"
 fi
 
-exec "$@"
-if 
-if [[] ! -f /install.lock ]]; then
+cd /suitecrm
+
+AU_PROMPT=0
+AP_PROMPT=0
+
+# If this is a new installation, proceed with it.
+if [[ ! -f /suitecrm/install.lock ]]; then
+
+	# Check permissions before install
     find . -type d -not -perm 2775 -exec chmod 2775 {}
     find . -type f -not -perm 0644 -exec chmod 0644 {}
     find . ! -user www-data -exec chown www-data:www-data {}
     chmod +x bin/console 
-    
-    ./bin/console suitecrm:app:install -u "$AUSER" -p "$APASS" -U "$DBUSER" -P "$DBPASS" -H "$DBHOST" -N "$sbname" -S "$SITEURL" -d "$DEMO"
 
-    find . -type d -not -perm 2775 -exec chmod 2775 {}
-    find . -type f -not -perm 0644 -exec chmod 0644 {}
-    find . \! -user www-data -exec chown www-data:www-data {}
-    chmod +x bin/console
+	# Create random admin credentials if none were supplied
+    if [[ -z $ADMIN_USER ]]; then
+		AU_PROMPT=1;
+		ADMIN_USER=admin_$(echo $RANDOM | md5sum | head -c 4; echo);
+	fi
+	if 	[[ -z $ADMIN_PASSWORD ]]; then
+		AP_PROMPT=1;
+		ADMIN_PASSWORD=$(echo $RANDOM | md5sum | head -c 24; echo);
+	fi
+
+	# Run installer
+    ./bin/console suitecrm:app:install -u "$ADMIN_USER" -p "$ADMIN_PASSWORD" -U "$DATABASE_USER" -P "$DATABASE_PASSWORD" -H "$DATABASE_SERVER" -N "$DATABASE_NAME" -S "$SUITECRM_SITEURL" -d "$DEMO";
+
+    find . -type d -not -perm 2775 -exec chmod 2775 {};
+    find . -type f -not -perm 0644 -exec chmod 0644 {};
+    find . \! -user www-data -exec chown www-data:www-data {};
+    chmod +x bin/console;
+	touch /suitecrm/install.lock;
 fi
-    echo <<<EOF
-    
 
-    apache2ctl -DFOREGROUND
+    [[ AU_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_USER as an environment variable. Therefore a randomized admin username has been created." && echo "ADMINISTRATOR USERNAME: $ADMIN_USER");
+	[[ AP_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_PASSWORD as an environment variable. Therefore a randomized admin PASSWORD has been created." &&echo "ADMINISTRATOR PASSWORD: $ADMIN_PASSWORD");
+
+exec "$@"
