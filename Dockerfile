@@ -100,9 +100,9 @@ WORKDIR /build
 
 RUN set -eux; \
     apt install composer; \
-    composer composer clearcache; \
+    composer clearcache; \
     rm -rf vendor/*; \
-    composer composer install --no-dev --prefer-dist --optimize-autoloader; \
+    composer install --no-dev --prefer-dist --optimize-autoloader; \
     composer dumpautoload;
 
 
