@@ -41,9 +41,8 @@ RUN apt -y install git; \
 
 WORKDIR /build
 
-RUN git clone https://github.com/salesagility/SuiteCRM-Core.git .
-
-
+RUN git clone https://github.com/salesagility/SuiteCRM-Core.git .; \
+    git checkout master;
 
 FROM base as build-php
 
@@ -64,10 +63,10 @@ RUN composer install; \
 FROM base as build-js
 
 RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | tee /usr/share/keyrings/yarnkey.gpg; \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list; \
+    echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list; \
     curl -fsSL https://deb.nodesource.com/setup_16.x | bash -; \
     apt-get install -y nodejs; \
-    apt install -y yarn;
+    apt update && apt install -y yarn
 
 COPY --from=build-php /build /build
 
