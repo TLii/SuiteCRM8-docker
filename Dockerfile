@@ -106,24 +106,29 @@ RUN set -eux; \
     composer dumpautoload;
 
 
-FROM base as serve
+FROM php:fpm as serve-php-fpm
 
 RUN set -eux; \
     apt update && apt -y upgrade; \
-    && apt install -y php-fpm \
-    php-curl \
-    php-intl \
-    php-json \
-    php-gd \
-    php-mbstring \
-    php-mysqli \
-    php-pdo_mysql \
-    php-openssl \
-    php-soap \
-    php-xml \
-    php-zip \
-    php-imap \
-    php-ldap \
+    && apt-get install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        openssl \
+    ;\
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install curl \
+    && docker-php-ext-install intl\
+    && docker-php-ext-install json \
+    && docker-php-ext-install mbstring \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install soap \
+    && docker-php-ext-install xml \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install imap \
+    && docker-php-ext-install ldap \
     ; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
