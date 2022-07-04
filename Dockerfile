@@ -102,6 +102,8 @@ RUN set -eux; \
     apt install composer; \
     composer clearcache; \
     rm -rf vendor/*; \
+    echo "# Change to production environment" > .env.local.php; \
+    echo "APP_ENV=prod" >> .env.local.php; \
     composer install --no-dev --prefer-dist --optimize-autoloader; \
     composer dumpautoload;
 
