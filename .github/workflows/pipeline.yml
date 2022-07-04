@@ -19,7 +19,7 @@ jobs:
     
     - name: Get current commit ID
       run: |
-        echo "GITHUB_HASH=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+        echo "GITHUB_HASH=$(git rev-parse --short \"$GITHUB_SHA\")" >> $GITHUB_ENV
       
     - name: Set branch after repo dispatch
       if: github.event_name == 'repository_dispatch'
