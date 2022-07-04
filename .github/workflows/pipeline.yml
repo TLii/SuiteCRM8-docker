@@ -17,7 +17,7 @@ jobs:
     - name: Check out CODE
       uses: actions/checkout@v2
     
-    - name: Get current commit ID in short
+    - name: Get current commit ID
       run: |
         echo "GITHUB_HASH=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
       
@@ -43,7 +43,7 @@ jobs:
         # Name of the Docker image
         image: suitecrm8/core
         # Tags override for Docker image
-        tags: fpm-latest, fpm-${{ env.BRANCH }}-latest, fpm-${{ env.BRANCH }}, fpm-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_SHA }}, ${{ env.GITHUB_HASH }}  # optional
+        tags: fpm-latest, fpm-${{ env.BRANCH }}-latest, fpm-${{ env.BRANCH }}, fpm-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_HASH }}  # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
