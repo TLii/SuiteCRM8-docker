@@ -86,8 +86,7 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /build
 
-RUN composer require scssphp; \
-    composer install; \
+RUN composer require scssphp/scssphp; \
     ./vendor/bin/pscss -s compressed ./public/legacy/themes/suite8/css/Dawn/style.scss > ./public/legacy/themes/suite8/css/Dawn/style.css
 
 
