@@ -35,7 +35,7 @@ jobs:
       run: |
         echo "BUILD_VERSION=$BRANCH-$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       
-    - name: Docker Build & Push Action
+    - name: Build fpm image and push it to Registry
       # You may pin to the exact commit or the version.
       # uses: mr-smithers-excellent/docker-build-push@a7fe6652db5c7274374844e81692992f5a2befb9
       uses: mr-smithers-excellent/docker-build-push@v5.6
@@ -61,7 +61,7 @@ jobs:
         # Adds latest tag to auto-generated GitOps tag
         addLatest: true # optional, default is false
 
-    - name: Docker Build & Push Action
+    - name: Build apache2 image and push it to Registry
       # You may pin to the exact commit or the version.
       # uses: mr-smithers-excellent/docker-build-push@a7fe6652db5c7274374844e81692992f5a2befb9
       uses: mr-smithers-excellent/docker-build-push@v5.6
