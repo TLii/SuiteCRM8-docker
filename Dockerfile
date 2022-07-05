@@ -51,8 +51,6 @@ FROM composer:1.9.3 AS composer
 # Build composer dependencies
 FROM base as build-php
 
-RUN set -eux; \
-
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /build
@@ -107,8 +105,7 @@ COPY --from=build-themes /build/public/legacy/themes/suite8/css/Dawn/style.css /
 # Run final image with php-fpm
 FROM php:fpm as serve-php-fpm
 
-RUN set -eux; \
-    apt update && apt -y upgrade; \
+RUN apt update && apt -y upgrade; \
     && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -151,8 +148,7 @@ CMD [ "php-fpm" ]
 # Run final image with apache2 and php
 FROM php:apache as serve-php-apache2
 
-RUN set -eux; \
-    apt update && apt -y upgrade; \
+RUN apt update && apt -y upgrade; \
     && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
