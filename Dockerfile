@@ -52,7 +52,6 @@ FROM composer:1.9.3 AS composer
 FROM base as build-php
 
 RUN set -eux; \
-    mkdir /build;
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
@@ -93,11 +92,12 @@ RUN composer install scssphp/scssphp; \
 
 
 
-# Create finalized image to be used with composer 
+# Create finalized image to be used 
 FROM base as final
 
-# Copy processed artifacts to final image
 RUN mkdir /final
+
+# Copy processed artifacts to final image
 COPY --from=build-php /build/vendor /final/vendor
 COPY --from=build-js /build/dist /final/dist
 COPY --from=build-themes /build/public/legacy/themes/suite8/css/Dawn/style.css /final/public/legacy/themes/suite8/css/Dawn/style.css
@@ -146,8 +146,10 @@ ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
 CMD [ "php-fpm" ]
 
-# Run final image with apache php
-FROM php:apache as serve-php-apache
+
+
+# Run final image with apache2 and php
+FROM php:apache as serve-php-apache2
 
 RUN set -eux; \
     apt update && apt -y upgrade; \

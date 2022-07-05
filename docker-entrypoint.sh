@@ -61,7 +61,8 @@ group=www-data
 	fi
 
 # Create necessary apache2 config changes to maintain directory similarities
-echo 
+sed -i -e "s/www\.example\.com/$SUITECRM_SITEURL/g" -e 's/var\/www\/html/suitecrm\/public/g' -e "s/localhost/$SUITECRM_SITEURL/g" /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/default-ssl.conf;
+sed -i 's/var\/www/suitecrm\/public/g' /etc/apache2/conf-available/docker-php.conf;
 
 # Test for existing installation and install as necessary; original code by Docker, Inc, edited by TLii
 if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
