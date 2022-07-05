@@ -109,7 +109,7 @@ COPY --from=build-themes /build/public/legacy/themes/suite8/css/Dawn/style.css /
 FROM php:fpm as serve-php-fpm
 
 RUN apt update && apt -y upgrade; \
-    && apt-get install -y \
+    apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
@@ -152,7 +152,7 @@ CMD [ "php-fpm" ]
 FROM php:apache as serve-php-apache2
 
 RUN apt update && apt -y upgrade; \
-    && apt-get install -y \
+    apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
