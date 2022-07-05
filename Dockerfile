@@ -82,6 +82,7 @@ RUN yarn install; \
 FROM base as build-themes
 
 COPY --from=build-php /build /build
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /build
 
