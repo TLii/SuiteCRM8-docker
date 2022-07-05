@@ -99,6 +99,7 @@ RUN mkdir /final
 # Copy processed artifacts to final image
 COPY --from=build-php /build/vendor /final/vendor
 COPY --from=build-js /build/dist /final/dist
+COPY --from=build-js /build/node_modules /final/node_modules
 COPY --from=build-themes /build/public/legacy/themes/suite8/css/Dawn/style.css /final/public/legacy/themes/suite8/css/Dawn/style.css
 
 
