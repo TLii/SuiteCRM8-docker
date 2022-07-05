@@ -22,7 +22,7 @@
 
 set -Eeuo pipefail
 
-[[ -d /suitecrm ]] && cd /suitecrm || (echo "WARN: SuiteCRM installation directory is missing. It should have been pre-made." && mkdir /suitecrm)
+([[ -d /suitecrm ]] && cd /suitecrm) || (echo "WARN: SuiteCRM installation directory is missing. It should have been pre-made." && mkdir /suitecrm)
 
 user=www-data
 group=www-data
@@ -60,6 +60,9 @@ group=www-data
 		fi
 	fi
 
+# Create necessary apache2 config changes to maintain directory similarities
+echo 
+
 # Test for existing installation and install as necessary; original code by Docker, Inc, edited by TLii
 if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
 	
@@ -69,7 +72,7 @@ if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
 	fi
 
 	echo >&2 "SuiteCRM not found in $PWD - copying now..."
-	if [ -n "$(find -mindepth 1 -maxdepth 1 -not -name wp-content)" ]; then
+	if [ -n "$(find . -mindepth 1 -maxdepth 1 -not -name wp-content)" ]; then
 		echo >&2 "WARNING: $PWD is not empty! (copying anyhow)"
 	fi
 
@@ -140,7 +143,7 @@ if [[ ! -f /suitecrm/install.lock ]]; then
 	touch /suitecrm/install.lock;
 fi
 
-    [[ AU_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_USER as an environment variable. Therefore a randomized admin username has been created." && echo "ADMINISTRATOR USERNAME: $ADMIN_USER");
-	[[ AP_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_PASSWORD as an environment variable. Therefore a randomized admin PASSWORD has been created." &&echo "ADMINISTRATOR PASSWORD: $ADMIN_PASSWORD");
+    [[ AU_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_USER as an environment variable. Therefore a randomized admin username has been created." && echo "ADMINISTRATOR USERNAME: $ADMIN_USER";
+	[[ AP_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_PASSWORD as an environment variable. Therefore a randomized admin PASSWORD has been created." &&echo "ADMINISTRATOR PASSWORD: $ADMIN_PASSWORD";
 
 exec "$@"
