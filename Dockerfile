@@ -26,6 +26,7 @@ RUN set -eux; \
         php-curl \
         php-intl \
         php-gd \
+        php-mbstring \
         php-mysql \
         php-soap \
         php-xml \
