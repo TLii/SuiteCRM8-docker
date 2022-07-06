@@ -58,7 +58,8 @@ WORKDIR /build
 
 ARG COMPOSER_ALLOW_SUPERUSER 1 
 
-RUN composer install --no-dev; \
+RUN apt install -y unzip; \
+    composer install --no-dev; \
     composer dumpautoload;
 
 
