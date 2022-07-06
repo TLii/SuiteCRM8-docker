@@ -115,6 +115,7 @@ RUN apt update && apt -y upgrade; \
         libjpeg62-turbo-dev \
         libpng-dev \
         openssl \
+        curl \
     ;\
     docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
@@ -158,6 +159,7 @@ RUN apt update && apt -y upgrade; \
     libjpeg62-turbo-dev \
     libpng-dev \
     openssl \
+    curl \
     ;\
     docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
