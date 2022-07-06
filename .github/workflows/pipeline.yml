@@ -43,7 +43,7 @@ jobs:
         # Name of the Docker image
         image: suitecrm8/core
         # Tags override for Docker image
-        tags: fpm-latest, fpm-${{ env.BRANCH }}-latest, fpm-${{ env.BRANCH }}, fpm-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_HASH }}  # optional
+        tags: fpm, fpm-latest, fpm-${{ env.BRANCH }}-latest, fpm-${{ env.BRANCH }}, fpm-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_HASH }}  # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
@@ -69,7 +69,7 @@ jobs:
         # Name of the Docker image
         image: suitecrm8/core
         # Tags override for Docker image
-        tags: apache2-latest, apache2-${{ env.BRANCH }}-latest, apache2-${{ env.BRANCH }}, apache2-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_HASH }}  # optional
+        tags: apache2, apache2-latest, apache2-${{ env.BRANCH }}-latest, apache2-${{ env.BRANCH }}, apache2-${{ env.BUILD_VERSION }}, ${{ env.GITHUB_HASH }}  # optional
         # Target Docker registry
         registry: ${{ secrets.REGISTRY_URL }}
         # Location of Dockerfile, if not Dockerfile in root directory
