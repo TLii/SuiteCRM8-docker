@@ -115,7 +115,7 @@ RUN apt update && apt -y upgrade; \
         libpng-dev \
         openssl \
     ;\
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install curl \
     && docker-php-ext-install intl\
@@ -158,7 +158,7 @@ RUN apt update && apt -y upgrade; \
     libpng-dev \
     openssl \
     ;\
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install curl \
     && docker-php-ext-install intl\
