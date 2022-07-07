@@ -134,7 +134,8 @@ RUN apt update && apt -y upgrade; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
 
-RUN mkdir /suitecrm && chown www-data:www-data /suitecrm
+RUN mkdir /suitecrm && chown www-data:www-data /suitecrm;  \
+    usermod -u 101 www-data && groupmod -g 101 www-data; \
 
 VOLUME /suitecrm
 
