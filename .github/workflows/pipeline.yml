@@ -97,9 +97,9 @@ jobs:
       
     - name: Update Chart Versions
       run: |
-        CHARTVER=$(sed -n  '/^version:.*/p' ./chart/Chart.yaml | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
-        sed -i "s/^version:.*/$CHARTVER/" ./chart/Chart.yaml
-        sed -i "s/^appVersion:.*/appVersion: $BUILD_VERSION/" ./chart/Chart.yaml
+        CHARTVER=$(sed -n  '/^version:.*/p' ./chart/chart/Chart.yaml | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
+        sed -i "s/^version:.*/$CHARTVER/" ./chart/chart/Chart.yaml
+        sed -i "s/^appVersion:.*/appVersion: $BUILD_VERSION/" ./chart/chart/Chart.yaml
         echo "Chart version: $CHARTVER\nApp Version: $BUILD_VERSION"
         
     - name: Push Chart
