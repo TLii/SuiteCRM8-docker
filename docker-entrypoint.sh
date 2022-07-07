@@ -121,10 +121,10 @@ AP_PROMPT=0
 if [[ ! -f /suitecrm/install.lock ]]; then
 
 	# Check permissions before install
-    find . -type d -not -perm 2775 -exec chmod 2775 {}
-    find . -type f -not -perm 0644 -exec chmod 0644 {}
-    find . ! -user www-data -exec chown www-data:www-data {}
-    chmod +x bin/console 
+	find . -type d -not -perm 2755 -exec chmod 2755 {} \;
+	find . -type f -not -perm 0644 -exec chmod 0644 {} \;
+	find . ! -user www-data -exec chown www-data:www-data {} \;
+	chmod +x bin/console
 
 	# Create random admin credentials if none were supplied
     if [[ -z $ADMIN_USER ]]; then
@@ -139,14 +139,18 @@ if [[ ! -f /suitecrm/install.lock ]]; then
 	# Run installer
     ./bin/console suitecrm:app:install -u "$ADMIN_USER" -p "$ADMIN_PASSWORD" -U "$DATABASE_USER" -P "$DATABASE_PASSWORD" -H "$DATABASE_SERVER" -N "$DATABASE_NAME" -S "$SUITECRM_SITEURL" -d "$DEMO";
 
-    find . -type d -not -perm 2775 -exec chmod 2775 {};
-    find . -type f -not -perm 0644 -exec chmod 0644 {};
-    find . \! -user www-data -exec chown www-data:www-data {};
-    chmod +x bin/console;
+	find . -type d -not -perm 2755 -exec chmod 2755 {} \;
+	find . -type f -not -perm 0644 -exec chmod 0644 {} \;
+	find . ! -user www-data -exec chown www-data:www-data {} \;
+	chmod +x bin/console
 	touch /suitecrm/install.lock;
 fi
 
     [[ AU_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_USER as an environment variable. Therefore a randomized admin username has been created." && echo "ADMINISTRATOR USERNAME: $ADMIN_USER";
 	[[ AP_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_PASSWORD as an environment variable. Therefore a randomized admin PASSWORD has been created." &&echo "ADMINISTRATOR PASSWORD: $ADMIN_PASSWORD";
+
+if [ "${1#-}" != "$1" ]; then
+	set -- php-fpm "$@"
+fi
 
 exec "$@"
