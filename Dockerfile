@@ -134,14 +134,15 @@ RUN apt update && apt -y upgrade; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
 RUN mkdir /suitecrm && chown www-data:www-data /suitecrm;  \
     usermod -u 101 www-data && groupmod -g 101 www-data; \
+    chmod a+x /docker-entrypoint.sh;
 
 VOLUME /suitecrm
 
 COPY --from=final --chown=www-data:www-data /build /usr/src/suitecrm/
-
-COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /suitecrm
 
@@ -179,13 +180,14 @@ RUN apt update && apt -y upgrade; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
 
-RUN mkdir /suitecrm && chown www-data:www-data /suitecrm
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN mkdir /suitecrm && chown www-data:www-data /suitecrm; \
+    chmod a+rx /docker-entrypoint.sh;
 
 VOLUME /suitecrm
 
 COPY --from=final --chown=www-data:www-data /build /usr/src/suitecrm/
-
-COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /suitecrm/public
 
