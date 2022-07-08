@@ -22,7 +22,7 @@
 
 set -Eeuo pipefail
 
-([[ -d /suitecrm ]] && cd /suitecrm) || (echo "WARN: SuiteCRM installation directory is missing. It should have been pre-made." && mkdir /suitecrm)
+([[ -d /suitecrm ]] && cd /suitecrm) || (echo "WARN: SuiteCRM installation directory is missing. It should have been pre-made." && mkdir /suitecrm && cd /suitecrm)
 
 user=www-data
 group=www-data
