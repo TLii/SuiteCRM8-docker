@@ -152,7 +152,11 @@ fi
     [[ AU_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_USER as an environment variable. Therefore a randomized admin username has been created." && echo "ADMINISTRATOR USERNAME: $ADMIN_USER";
 	[[ AP_PROMPT -eq 1 ]] && echo "WARNING: You did not include ADMIN_PASSWORD as an environment variable. Therefore a randomized admin PASSWORD has been created." &&echo "ADMINISTRATOR PASSWORD: $ADMIN_PASSWORD";
 
-if [ "${1#-}" != "$1" ]; then
+
+# Wrap up with executing correct process with correct arguments
+if [[ "$1" == apache2* ]] && [ "${1#-}" != "$1" ]; then
+	set -- apache2-foreground "$@"
+elif [ "${1#-}" != "$1" ]; then
 	set -- php-fpm "$@"
 fi
 
