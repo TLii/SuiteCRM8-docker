@@ -93,18 +93,21 @@ if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
 		# avoid "tar: .: Cannot utime: Operation not permitted" and "tar: .: Cannot change mode to rwxr-xr-x: Operation not permitted"
 		targetTarArgs+=( --no-overwrite-dir )
 	fi
-	# loop over "pluggable" content in the source, and if it already exists in the destination, skip it
+	# loop over modular content in the source, and if it already exists in the destination, exclude it
 	for contentPath in \
 		/usr/src/suitecrm/core/modules \
 		/usr/src/suitecrm/extensions \
 		/usr/src/suitecrm/public/legacy/modules \
 		/usr/src/suitecrm/public/legacy/custom/*/* \
 	; do
+		# Check if contentPath exists
 		contentPath="${contentPath%/}"
 		[ -e "$contentPath" ] || continue
-		contentPath="${contentPath#/usr/src/wordpress/}"
+		# If contentPath exists in source and application directory, exclude it from overwrite
+		contentPath="${contentPath#/usr/src/suitecrm/}"
 		if [ -e "$PWD/$contentPath" ]; then
-			echo >&2 "WARNING: '$PWD/$contentPath' exists. Not overwriting with container version." #TODO: Make this check if update is in fact newer and patch if possible.
+			echo >&2 "WARNING: '$PWD/$contentPath' exists. Not overwriting with container version." 
+			#TODO: Make this check if update is in fact newer and patchable.
 			sourceTarArgs+=( --exclude "./$contentPath" )
 		fi
 	done
