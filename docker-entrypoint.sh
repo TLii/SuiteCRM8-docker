@@ -117,6 +117,7 @@ fi
 
 cd /suitecrm
 
+# Do not prompt admin user and password by default.
 AU_PROMPT=0
 AP_PROMPT=0
 
@@ -129,7 +130,7 @@ if [[ ! -f /suitecrm/install.lock ]]; then
 	find . ! -user www-data -exec chown www-data:www-data {} \;
 	chmod +x bin/console
 
-	# Create random admin credentials if none were supplied
+	# Create random admin credentials if none were supplied and prompt them.
     if [[ -z $ADMIN_USER ]]; then
 		AU_PROMPT=1;
 		ADMIN_USER=admin_$(echo $RANDOM | md5sum | head -c 4; echo);
@@ -142,6 +143,7 @@ if [[ ! -f /suitecrm/install.lock ]]; then
 	# Run installer
     ./bin/console suitecrm:app:install -u "$ADMIN_USER" -p "$ADMIN_PASSWORD" -U "$DATABASE_USER" -P "$DATABASE_PASSWORD" -H "$DATABASE_SERVER" -N "$DATABASE_NAME" -S "$SUITECRM_SITEURL" -d "$DEMO";
 
+	# Recheck permissions
 	find . -type d -not -perm 2755 -exec chmod 2755 {} \;
 	find . -type f -not -perm 0644 -exec chmod 0644 {} \;
 	find . ! -user www-data -exec chown www-data:www-data {} \;
