@@ -32,7 +32,9 @@ RUN set -eux; \
         php-xml \
         php-zip \
         php-imap \
-        php-ldap; \
+        php-ldap \
+        ca-certificates \
+        ; \
         mkdir /build;
 
 WORKDIR /build
