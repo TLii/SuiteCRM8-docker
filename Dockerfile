@@ -96,7 +96,8 @@ RUN composer require scssphp/scssphp; \
 # Create finalized image to be used 
 FROM base as final
 
-RUN mkdir /final
+# Move source code to final image
+RUN mv /build /final
 
 # Copy processed artifacts to final image
 COPY --from=build-php /build/vendor /final/vendor
