@@ -75,7 +75,7 @@ if [ ! -e /suitecrm/public/index.php ] && [ ! -e /suitecrm/VERSION ]; then
 	fi
 
 	echo >&2 "SuiteCRM not found in $PWD - copying now..."
-	if [ -n "$(find . -mindepth 1 -maxdepth 1 -not -name wp-content)" ]; then
+	if [ -n "$(find . -mindepth 1 -maxdepth 1)" ]; then
 		echo >&2 "WARNING: $PWD is not empty! (copying anyhow)"
 	fi
 
