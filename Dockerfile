@@ -145,7 +145,7 @@ RUN mkdir /suitecrm && chown www-data:www-data /suitecrm;  \
 
 VOLUME /suitecrm
 
-COPY --from=final --chown=www-data:www-data /build /usr/src/suitecrm/
+COPY --from=final --chown=www-data:www-data /final /usr/src/suitecrm/
 
 WORKDIR /suitecrm
 
@@ -190,7 +190,7 @@ RUN mkdir /suitecrm && chown www-data:www-data /suitecrm; \
 
 VOLUME /suitecrm
 
-COPY --from=final --chown=www-data:www-data /build /usr/src/suitecrm/
+COPY --from=final --chown=www-data:www-data /final /usr/src/suitecrm/
 
 WORKDIR /suitecrm/public
 
