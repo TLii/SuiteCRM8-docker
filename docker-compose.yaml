@@ -1,8 +1,23 @@
-version: "3.9"
-services: 
-  fpm:
-    build:
-      dockerfile: Dockerfile
-  nginx
-  db:
-    image: mariadb:latest
+services:
+    suitecrm:
+        build:
+          context: .
+          target: serve-php-apache2
+        environment: 
+            - DATABASE_SERVER=maria
+            - DATABASE_USER=suitecrm-db-user
+            - DATABASE_PASSWORD=suitecrm-db-password
+            - DATABASE_NAME=suitecrm
+            - SUITECRM_SITEURL=localhost
+        volumes:
+            - /suitecrm
+        ports: 
+            - "8080:80"
+    maria:
+        image: mariadb
+        restart: always
+        environment:
+        - MYSQL_RANDOM_ROOT_PASSWORD=y
+        - MYSQL_DATABASE=suitecrm
+        - MYSQL_USER=suitecrm-db-user
+        - MYSQL_PASSWORD=suitecrm-db-password
